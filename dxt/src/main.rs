@@ -72,11 +72,13 @@ fn main() {
         pb.inc(1);
     });
 
-    pb.finish_with_message(&format!(
-        "Extracted {} entries to {}",
-        num_entries,
-        out_dir.display()
-    ));
+    pb.finish_with_message(
+        format!(
+            "Extracted {} entries to {}",
+            num_entries,
+            out_dir.display()
+        )
+    );
 }
 
 // 請在 Cargo.toml 中加入：
