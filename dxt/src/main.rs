@@ -49,7 +49,7 @@ fn main() {
 
     // 6. 並行解壓
     indices.into_par_iter().for_each(|i| {
-        let mut archive = ZipArchive::new(Cursor::new(&*arc_mmap))
+        let archive = ZipArchive::new(Cursor::new(&*arc_mmap))
             .expect("Failed to reopen archive");
         let mut entry = archive.by_index(i).expect("Failed to access entry");
 
