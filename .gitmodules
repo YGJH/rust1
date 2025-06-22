@@ -1,0 +1,3 @@
+[submodule "blondie"]
+	path = blondie
+	url = https://github.com/nico-abram/blondie.git
