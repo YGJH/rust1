@@ -92,7 +92,7 @@ fn main() {
     // 主執行緒接收訊號並更新進度條
     for _ in 0..total {
         rx.recv().unwrap();
-        pb.inc(1);
+        // pb.inc(1);
     }
     pb.finish_with_message(format!("Extracted {} entries to {:?}", total, out_dir));
 }

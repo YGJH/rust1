@@ -1,13 +1,25 @@
 use eframe::egui;
 // use std::collections::HashSet;
 use crate::egui::FontFamily;
+use std::fmt;
 // use egui::FontFamily;
 use crate::egui::FontData;
 use crate::egui::FontDefinitions;
+
+
 #[derive(Clone, Copy, PartialEq)]
 enum Cell {
     Dead = 0,
     Alive = 1,
+}
+impl fmt::Display for Cell {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let symbol = match *self {
+            Cell::Alive => "⬜",
+            Cell::Dead => "⬛"
+        };
+        write!(f, "{}", symbol)
+    }
 }
 
 pub struct GameOfLifeApp {
@@ -41,6 +53,35 @@ impl Universe {
     pub fn clear(&mut self) {
         self.cells.fill(Cell::Dead);
     }
+    pub fn set_gosper_glider_gun(&mut self, offset_row: usize, offset_col: usize) {
+        // Gosper Glider Gun 的相對座標（經典版本）
+        let coords: [(usize, usize); 36] = [
+            (5,1), (5,2), (6,1), (6,2),
+            (3,13), (3,14),
+            (4,12), (4,16),
+            (5,11), (5,17),
+            (6,11), (6,15), (6,17), (6,18),
+            (7,11), (7,17),
+            (8,12), (8,16),
+            (9,13), (9,14),
+            (1,25), (2,23), (2,25),
+            (3,21), (3,22),
+            (4,21), (4,22),
+            (5,21), (5,22),
+            (6,23), (6,25),
+            (7,25),
+            (3,35), (3,36),
+            (4,35), (4,36),
+        ];
+        for (r, c) in coords.iter().cloned() {
+            let row = offset_row + r;
+            let col = offset_col + c;
+            if row < self.height && col < self.width {
+                let idx = self.get_index(row, col);
+                self.cells[idx] = Cell::Alive;
+            }
+        }
+    }
 
     pub fn randomize(&mut self) {
         use std::collections::hash_map::DefaultHasher;
@@ -67,6 +108,7 @@ impl Universe {
 
     pub fn toggle_cell(&mut self, row: usize, col: usize) {
         if row < self.height && col < self.width {
+
             let idx = self.get_index(row, col);
             self.cells[idx] = match self.cells[idx] {
                 Cell::Alive => Cell::Dead,
@@ -148,7 +190,7 @@ impl Universe {
 
 impl Default for GameOfLifeApp {
     fn default() -> Self {
-        let grid_size = 50;
+        let grid_size = 100;
         let mut universe = Universe::new(grid_size, grid_size);
         
         // 設置一些初始模式
@@ -178,11 +220,11 @@ impl Default for GameOfLifeApp {
 impl eframe::App for GameOfLifeApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // 頂部控制面板
-            let mut fonts = FontDefinitions::default();
+        let mut fonts = FontDefinitions::default();
 
         // Install my own font (maybe supporting non-latin characters):
         fonts.font_data.insert("my_font".to_owned(),
-            FontData::from_static(include_bytes!("../jf-openhuninn-2.1.ttf"))
+            FontData::from_static(include_bytes!("../../jf-openhuninn-2.1.ttf"))
         
         );
 
@@ -223,7 +265,7 @@ impl eframe::App for GameOfLifeApp {
                 ui.separator();
                 
                 ui.label("速度:");
-                ui.add(egui::Slider::new(&mut self.speed, 1.0..=60.0).suffix(" FPS"));
+                ui.add(egui::Slider::new(&mut self.speed, 1.0..=256.0).suffix(" FPS"));
                 
                 ui.separator();
                 
@@ -261,7 +303,12 @@ impl eframe::App for GameOfLifeApp {
                 ]);
                 self.generation = 0;
             }
-            
+            if ui.button("滑翔機槍").clicked() {
+                self.universe.clear();
+                self.universe.set_gosper_glider_gun(0, 0);
+                self.generation = 0;
+           }
+
             if ui.button("信標").clicked() {
                 self.universe.clear();
                 self.universe.set_cells(&[
@@ -293,13 +340,13 @@ impl eframe::App for GameOfLifeApp {
             let (response, painter) = ui.allocate_painter(available_rect.size(), egui::Sense::click_and_drag());
             
             // 處理鼠標輸入
-            if response.clicked() || response.dragged() {
+            if response.drag_started() || response.dragged() {
                 if let Some(pointer_pos) = response.interact_pointer_pos() {
                     let relative_pos = pointer_pos - response.rect.min;
                     let col = (relative_pos.x / self.cell_size) as usize;
                     let row = (relative_pos.y / self.cell_size) as usize;
                     
-                    if response.clicked() {
+                    if response.drag_started() {
                         self.universe.toggle_cell(row, col);
                     } else if response.dragged() {
                         let is_shift_held = ui.input(|i| i.modifiers.shift);
@@ -339,7 +386,7 @@ impl eframe::App for GameOfLifeApp {
 
         // 自動更新邏輯
         if self.is_running {
-            self.timer += ctx.input(|i| i.unstable_dt);
+            self.timer += ctx.input(|i: &egui::InputState| i.unstable_dt);
             let target_interval = 1.0 / self.speed;
             
             if self.timer >= target_interval {

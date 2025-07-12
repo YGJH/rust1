@@ -3,6 +3,11 @@ name = "dxt"
 version = "0.1.0"
 edition = "2024"
 
+[profile.release]
+opt-level = 3         # 速度最佳化
+lto = true            # Link Time Optimization
+codegen-units = 1     # 更佳優化（但會增加編譯時間）
+
 [dependencies]
 zip = "0.6"
 memmap2 = "0.5"

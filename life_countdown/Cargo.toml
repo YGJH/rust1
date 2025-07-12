@@ -1,0 +1,16 @@
+[package]
+name = "life_countdown"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "life_countdown"
+path = "src/main.rs"
+
+[dependencies]
+eframe = "0.28"
+egui = "0.28"
+chrono = { version = "0.4", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+dirs = "5.0"
