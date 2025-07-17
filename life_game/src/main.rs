@@ -1,6 +1,11 @@
-use eframe::egui;
+#![windows_subsystem = "windows"]
+#![allow(private_interfaces, unused_import)]
 // use std::collections::HashSet;
 use crate::egui::FontFamily;
+use eframe::{egui, NativeOptions};
+use image::load_from_memory;
+use std::path::PathBuf;
+use std::sync::Arc;
 use std::fmt;
 // use egui::FontFamily;
 use crate::egui::FontData;
@@ -220,7 +225,7 @@ impl Default for GameOfLifeApp {
 impl eframe::App for GameOfLifeApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // 頂部控制面板
-        let mut fonts = FontDefinitions::default();
+        let mut fonts: FontDefinitions = FontDefinitions::default();
 
         // Install my own font (maybe supporting non-latin characters):
         fonts.font_data.insert("my_font".to_owned(),
@@ -236,6 +241,16 @@ impl eframe::App for GameOfLifeApp {
         fonts.families.get_mut(&FontFamily::Monospace).unwrap()
             .push("my_font".to_owned());
         ctx.set_fonts(fonts);
+        ctx.set_visuals(egui::Visuals {
+            window_rounding: egui::Rounding::same(10.0),
+            window_shadow: egui::epaint::Shadow {
+                offset: Default::default(),           // Vec2::ZERO
+                blur:   10.0,
+                spread: 0.0,
+                color:  egui::Color32::from_black_alpha(50),  // ← 新增這行
+            },
+            ..egui::Visuals::dark()
+        });
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal(|ui| {
                 if ui.button(if self.is_running { "⏸ 暫停" } else { "▶ 開始" }).clicked() {
@@ -403,14 +418,24 @@ impl eframe::App for GameOfLifeApp {
 
 
 fn main() -> Result<(), eframe::Error> {
+
+    let png_bytes = include_bytes!("../assets/playstore.png");
+    let img = load_from_memory(png_bytes)
+        .expect("Failed to load playstore.png")
+        .to_rgba8();
+    let icon = egui::IconData {
+        rgba: img.clone().into_raw(),
+        width: img.clone().width() as u32,
+        height: img.clone().height() as u32,
+    };
     let mut fonts = FontDefinitions::default();
 
     // Install my own font (maybe supporting non-latin characters):
     fonts.font_data.insert("my_font".to_owned(),
-        FontData::from_static(include_bytes!("../jf-openhuninn-2.1.ttf"))
+        FontData::from_static(include_bytes!("../../jf-openhuninn-2.1.ttf"))
     
     );
-
+    // 1) 编译时加载 playstore.png
     // Put my font first (highest priority):
     fonts.families.get_mut(&FontFamily::Proportional).unwrap()
         .insert(0, "my_font".to_owned());
@@ -420,16 +445,20 @@ fn main() -> Result<(), eframe::Error> {
         .push("my_font".to_owned());
 
 
-    let options = eframe::NativeOptions {
+
+    let options = NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([1200.0, 800.0])
-            .with_title("康威生命遊戲 - Conway's Game of Life"),
+            .with_min_inner_size([600.0, 400.0])
+            .with_title("康威生命遊戲 - Conway's Game of Life")
+            .with_icon(icon),  // ← 这里
         ..Default::default()
     };
+
     
     eframe::run_native(
         "康威生命遊戲",
         options,
-        Box::new(|_cc| Box::new(GameOfLifeApp::default())),
+        Box::new(|_cc| Ok(Box::new(GameOfLifeApp::default()))),
     )
 }

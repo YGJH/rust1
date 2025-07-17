@@ -1,5 +1,5 @@
 [package]
-name = "piyan"
+name = "dapi"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,5 +7,4 @@ edition = "2021"
 
 [dependencies]
 f128 = "0.2.9"
-num-traits = "0.2.19"
 rug = "1.27.0"

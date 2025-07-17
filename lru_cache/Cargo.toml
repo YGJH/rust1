@@ -1,11 +1,8 @@
 [package]
-name = "piyan"
+name = "lru_cache"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-f128 = "0.2.9"
-num-traits = "0.2.19"
-rug = "1.27.0"
