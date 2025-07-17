@@ -3,14 +3,35 @@ name = "life_countdown"
 version = "0.1.0"
 edition = "2021"
 
-[[bin]]
-name = "life_countdown"
-path = "src/main.rs"
-
 [dependencies]
-eframe = "0.28"
-egui = "0.28"
+eframe = { version = "0.29", default-features = false, features = [
+    "default_fonts",
+    "glow",
+    "persistence",
+] }
 chrono = { version = "0.4", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 dirs = "5.0"
+image = "0.24"
+
+# Windows 特定配置 - 添加必需的 winapi features
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = [
+    "winuser",
+    "wingdi", 
+    "wincon",
+    "handleapi",
+    "processenv",
+    "winbase",
+    "shellapi",
+    "psapi",
+    "winerror",
+    "fileapi",
+    "synchapi",
+    "minwindef",
+    "windef",
+    "libloaderapi"
+] }
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1"
