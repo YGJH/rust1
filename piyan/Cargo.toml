@@ -4,3 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+<<<<<<< HEAD
+=======
+rand = "0.9.2"
+>>>>>>> 60f765d805766cb42c0d5b66fd26622203721807

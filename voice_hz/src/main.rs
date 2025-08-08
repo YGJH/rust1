@@ -2,12 +2,18 @@ use std::f32::consts::PI;
 use std::time::Duration;
 use anyhow::Result;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+// use cpal::{HostId, host_from_id, HostTrait};
 
 fn main() -> Result<()> {
     // 1. 拿到預設 Host 跟預設輸出裝置
     let host = cpal::default_host();
     let device = host.default_output_device()
         .expect("找不到預設輸出設備，請確認聲音裝置");
+    // 強制使用 PulseAudio
+    // let host = host_from_id(HostId::PulseAudio)
+    //     .expect("PulseAudio backend 不可用，請先安裝 libpulse-dev");
+    // let device = host.default_output_device()
+    //     .expect("找不到預設輸出設備，請確認聲音裝置");
 
     // 2. 讀取裝置支援的預設設定（SampleRate、Channels）
     let config = device.default_output_config()?;
@@ -15,7 +21,7 @@ fn main() -> Result<()> {
     let channels = config.channels() as usize;
 
     // 3. 你想播幾 Hz？可以改成讀參數或互動輸入
-    let freq_hz = 10.0; // A4 音高，測試用
+    let freq_hz = 7.5; // A4 音高，測試用
 
     // 4. 產生正弦波產生器：sample_clock 控制相位
     let mut sample_clock = 0f32;
